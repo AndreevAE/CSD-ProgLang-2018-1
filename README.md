@@ -25,7 +25,7 @@ BaseHTTPServer или wsgiref, в т.ч. допускается решения �
 Срок выполнения 1 задания - 15 ноября
 
 # API
-## POST
+## GET
 
  1. Files and folders listing
 
@@ -35,7 +35,7 @@ BaseHTTPServer или wsgiref, в т.ч. допускается решения �
  2. Downloading file
 
     `download`
-    http://localhost:8000/[path]/?download
+    http://localhost:8000/[path_to_file]/[filename]?download
 
  3. Creating new empty folder
 
