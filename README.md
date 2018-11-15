@@ -1,4 +1,5 @@
 
+
 # CSD-ProgLang-2018-1
 python web-app backend with json API to access file system
 
@@ -24,25 +25,51 @@ BaseHTTPServer или wsgiref, в т.ч. допускается решения �
 
 Срок выполнения 1 задания - 15 ноября
 
-# API
-## GET
+# Starting server
+`$ python3 main.py`
 
- 1. Files and folders listing
+# JSON API
+All methods GET
 
-    `ls`
+ 1. Files and folders listing `ls`
     http://localhost:8000/[path]/?ls
+	    `{
+    "path": "/",
+    "query": "ls",
+    "result": [
+        "data.json",
+        "folder1"
+    ]
+	}`
 
- 2. Downloading file
-
-    `download`
+ 2. Downloading file `download`
     http://localhost:8000/[path_to_file]/[filename]?download
 
- 3. Creating new empty folder
-
-    `mkdir`
+ 3. Creating new empty folder `mkdir`
     http://localhost:8000/[path]/?mkdir
+	    `{
+    "path": "/not_found_folder/",
+    "query": "mkdir",
+    "result": "Success! Folder was created"
+	}`
 
- 4. Removing empty folder
-
-    `rmdir`
+ 4. Removing empty folder `rmdir`
     http://localhost:8000/[path]/?rmdir
+	    `{
+    "path": "/not_found_folder/",
+    "query": "rmdir",
+    "result": "Success! Folder was removed"
+	}`
+
+#### errors example
+	`{
+    "path": "[path]",
+    "query": "",
+    "error": "Not Correct Query"
+	}`
+	
+	`{
+    "path": "/not_found_folder/",
+    "query": "ls",
+    "error": "File Not Found"
+	}`
