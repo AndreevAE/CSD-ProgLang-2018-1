@@ -17,6 +17,9 @@ def file_server(environ, start_response):
 
     response = {'path': path, 'query': query}
 
+    if not os.path.exists(BASE_ROOT_PATH):
+        os.makedirs(BASE_ROOT_PATH)
+    
     if query == "ls":
         try:
             file_folder_list = os.listdir(fullpath)
