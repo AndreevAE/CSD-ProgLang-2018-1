@@ -31,12 +31,13 @@ def file_server(environ, start_response):
     </style>
 </head>
 <body>
-    <p id="showData"></p>
+    <div id="showData"></div>
 </body>
 
 <script>
     function httpGet(theUrl)
     {
+        console.log("httpGet(" + theUrl + ")");
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
         xmlHttp.send( null );
@@ -52,24 +53,31 @@ def file_server(environ, start_response):
 
     function createExplorerFromJSON(json)
     {
+        var pathParagraph = document.createElement("p");
+        var queryParagraph = document.createElement("p");
+        var errorParagraph = document.createElement("p");
         var table = document.createElement("table");
+        var resultDirs;
+        var currentPath;
 
         for (var key in json) {
             switch (key) {
                 case 'path':
                     console.log(key + ':' + json[key]);
-                    // TODO: to header
+                    pathParagraph.textContent = json[key];
+                    currentPath = json[key];
                     break;
                 case 'query':
                     console.log(key + ':' + json[key]);
-                    // TODO: not show
+                    queryParagraph.textContent = json[key];
                     break;
                 case 'error':
                     console.log(key + ':' + json[key]);
+                    errorParagraph.textContent = json[key];
                     break;
                 case 'result':
                     console.log(key + ':' + json[key]);
-
+                    resultDirs = json[key];
                     break;
                 default:
                     console.log(key + ':' + json[key]);
@@ -77,24 +85,64 @@ def file_server(environ, start_response):
             }
         }
 
-        var rows = [];
-        for (var key in json) {
-            if (rows.indexOf(key) === -1) {
-                rows.push(key);
-            }
+        if (currentPath != "/") {
+            var folders = currentPath.split("/");
+            console.log("Folders: " + folders);
+
+            var tr = table.insertRow(-1);
+            var tabCell = tr.insertCell(-1);
+            var pathA = document.createElement("a");
+            var len = folders.length;
+            var topPath = folders.slice(0, len - 1).join("/");
+            var lsLink = topPath + "?ls";
+            pathA.setAttribute('href', 'javascript:void(0)');
+            pathA.addEventListener("click", function(){
+                console.log(lsLink);
+                jsonString = httpGet(lsLink);
+                json = JSON.parse(jsonString);
+                createExplorerFromJSON(json);
+            }, false);
+            pathA.textContent = "..";
+            tabCell.appendChild(pathA);
         }
 
-        for (var i = 0; i < rows.length; i++) {
+        for (var i = 0; i < resultDirs.length; i++) {
             var tr = table.insertRow(-1);
-            var th = document.createElement("th");
-            th.innerHTML = rows[i];
-            tr.appendChild(th);
+
             var tabCell = tr.insertCell(-1);
-            tabCell.innerHTML = json[rows[i]];
+            var pathA = document.createElement("a");
+            var lsLink = currentPath + resultDirs[i] + "?ls";
+            pathA.setAttribute('href', 'javascript:void(0)');
+            pathA.addEventListener("click", function(){
+                console.log(lsLink);
+                jsonString = httpGet(lsLink);
+                json = JSON.parse(jsonString);
+                createExplorerFromJSON(json);
+            }, false);
+            pathA.textContent = resultDirs[i];
+            tabCell.appendChild(pathA);
+
+            var rmdirCell = tr.insertCell(-1);
+            var deleteA = document.createElement("a");
+            var rmdirLink = currentPath + resultDirs[i] + "/?rmdir";
+            deleteA.setAttribute('href', 'javascript:void(0)');
+            deleteA.addEventListener("click", function(){
+                console.log(rmdirLink);
+                httpGet(rmdirLink);
+
+                jsonString = httpGet(currentPath + "?ls");
+                json = JSON.parse(jsonString);
+                createExplorerFromJSON(json);
+            }, false);
+            deleteA.textContent = "x";
+            rmdirCell.appendChild(deleteA);
         }
 
         var divContainer = document.getElementById("showData");
         divContainer.innerHTML = "";
+        divContainer.appendChild(pathParagraph);
+        divContainer.appendChild(queryParagraph);
+        divContainer.appendChild(errorParagraph);
         divContainer.appendChild(table);
 
         var dirNameTextField = document.createElement("input");
@@ -102,18 +150,22 @@ def file_server(environ, start_response):
         dirNameTextField.setAttribute('id', 'dirNameTextField');
         divContainer.appendChild(dirNameTextField)
 
+        var mkdirParagraph = document.createElement("p");
         var mkdirButton = document.createElement("input");
         mkdirButton.setAttribute('type', 'button');
         mkdirButton.setAttribute('value', 'Make New Dir');
         var createDirHandler = function() {
             return function() {
                 var dirName = document.getElementById('dirNameTextField').value;
-                httpGet(dirName + "?mkdir");
-                rootPath();
+                httpGet(currentPath + dirName + "?mkdir");
+                jsonString = httpGet(currentPath +"?ls");
+                json = JSON.parse(jsonString);
+                createExplorerFromJSON(json);
             };
         };
         mkdirButton.onclick = createDirHandler();
-        divContainer.appendChild(mkdirButton);
+        mkdirParagraph.appendChild(mkdirButton);
+        divContainer.appendChild(mkdirParagraph);
     }
 
     rootPath();
