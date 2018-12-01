@@ -9,6 +9,8 @@ def file_server(environ, start_response):
     headers = [('Content-type', 'text/html; charset=utf-8')]
     start_response(status, headers)
 
+
+    method = environ['REQUEST_METHOD']
     html1 = [b"""
 <!DOCTYPE html>
 <html>
@@ -111,10 +113,10 @@ def file_server(environ, start_response):
 
             var tabCell = tr.insertCell(-1);
             var pathA = document.createElement("a");
-            var lsLink = currentPath + resultDirs[i] + "?ls";
             pathA.setAttribute('href', 'javascript:void(0)');
-            pathA.addEventListener("click", function(){
-                console.log(lsLink);
+            pathA.addEventListener("click", function(e){
+                var currentLsLink = e.target.innerText;
+                var lsLink = currentPath + currentLsLink + "?ls"
                 jsonString = httpGet(lsLink);
                 json = JSON.parse(jsonString);
                 createExplorerFromJSON(json);
@@ -124,9 +126,12 @@ def file_server(environ, start_response):
 
             var rmdirCell = tr.insertCell(-1);
             var deleteA = document.createElement("a");
-            var rmdirLink = currentPath + resultDirs[i] + "/?rmdir";
             deleteA.setAttribute('href', 'javascript:void(0)');
-            deleteA.addEventListener("click", function(){
+            deleteA.addEventListener("click", function(e){
+                console.log()
+                var currentRmdirLink = e.target.parentElement.parentElement.children[0].children[0].innerText
+                var dir = resultDirs[i]
+                var rmdirLink = currentPath + currentRmdirLink  + "/?rmdir";
                 console.log(rmdirLink);
                 httpGet(rmdirLink);
 
@@ -173,8 +178,6 @@ def file_server(environ, start_response):
 
 </html>
 """]
-
-    method = environ['REQUEST_METHOD']
     path = environ['PATH_INFO']
     query = environ['QUERY_STRING']
 
