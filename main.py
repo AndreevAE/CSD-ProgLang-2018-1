@@ -59,6 +59,7 @@ def file_server(environ, start_response):
         var queryParagraph = document.createElement("p");
         var errorParagraph = document.createElement("p");
         var table = document.createElement("table");
+        var fileContent = document.createElement("p");
         var resultDirs;
         var currentPath;
 
@@ -123,7 +124,13 @@ def file_server(environ, start_response):
                 var lsLink = currentPath + currentLsLink + "?ls"
                 jsonString = httpGet(lsLink);
                 json = JSON.parse(jsonString);
-                createExplorerFromJSON(json);
+                if (typeof json['result'] === 'undefined') {
+                    var downloadLink = currentPath + currentLsLink + "?download"
+                    fileContent.textContent = httpGet(downloadLink);
+                } else {
+                    createExplorerFromJSON(json);
+                }
+
             }, false);
             pathA.textContent = resultDirs[i];
             tabCell.appendChild(pathA);
@@ -175,6 +182,8 @@ def file_server(environ, start_response):
         mkdirButton.onclick = createDirHandler();
         mkdirParagraph.appendChild(mkdirButton);
         divContainer.appendChild(mkdirParagraph);
+
+        divContainer.appendChild(fileContent);
     }
 
     rootPath();
