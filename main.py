@@ -106,6 +106,8 @@ def file_server(environ, start_response):
             }, false);
             pathA.textContent = "..";
             tabCell.appendChild(pathA);
+
+            currentPath += '/'
         }
 
         for (var i = 0; i < resultDirs.length; i++) {
