@@ -107,7 +107,9 @@ def file_server(environ, start_response):
             pathA.textContent = "..";
             tabCell.appendChild(pathA);
 
-            currentPath += '/'
+            if (!currentPath.endsWith('/')) {
+                currentPath += '/'
+            }
         }
 
         for (var i = 0; i < resultDirs.length; i++) {
